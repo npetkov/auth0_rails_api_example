@@ -2,7 +2,7 @@
 module BearerHeaders
   extend ActiveSupport::Concern
 
-  WWW_AUTHENTICATE = 'WWW-Authenticate'
+  WWW_AUTHENTICATE = 'WWW-Authenticate'.freeze
 
   included do
     def auth0_unauthenticated(decode_error)

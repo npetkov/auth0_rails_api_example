@@ -4,13 +4,10 @@ class AuthController < ActionController::API
 
   def token
     auth_header = request.headers['Authorization'] || ''
-    token = auth_header.split.last || cookies[:auth_token]
+    auth_token_string = auth_header.split.last || cookies[:auth_token]
 
     begin
-      auth_token = decode_auth_token token
-      validate_csrf_token! auth_token
-
-      api_token  = encode_api_token auth_token
+      api_token = create_api_token auth_token_string
       render json: { api_token: api_token }, status: 201
     rescue CsrfTokenInvalid, JWT::DecodeError => e
       response.headers.merge!(auth0_unauthenticated(e))
@@ -23,9 +20,15 @@ class AuthController < ActionController::API
   class CsrfTokenInvalid < StandardError
   end
 
+  def create_api_token(auth_token_string)
+    auth_token = decode_auth_token auth_token_string
+    validate_csrf_token! auth_token
+    encode_api_token auth_token
+  end
+
   def validate_csrf_token!(auth_token)
     header_token = request.headers['X-API-CSRF-TOKEN']
-    digest = OpenSSL::HMAC.hexdigest('SHA256', "#{ENV['AUTH_CLIENT_SECRET']}", auth_token.to_s)
+    digest = OpenSSL::HMAC.hexdigest('SHA256', ENV['AUTH_CLIENT_SECRET'].to_s, auth_token.to_s)
     raise CsrfTokenInvalid, 'Can\'t verify API CSRF token' unless header_token == digest
   end
 

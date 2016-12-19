@@ -10,8 +10,8 @@ class ApplicationController < ActionController::API
     auth_header = request.headers['Authorization'] || ''
     token = auth_header.split.last
     options = {
-        verify_iat: true,
-        algorithm: 'HS256'
+      verify_iat: true,
+      algorithm: 'HS256'
     }
     begin
       @token = JWT.decode(token, ENV['API_SECRET'], true, options)[0]
