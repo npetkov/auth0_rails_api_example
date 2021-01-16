@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AuthController < ActionController::API
   include ActionController::Cookies
   include BearerHeaders
@@ -28,13 +30,13 @@ class AuthController < ActionController::API
 
   def validate_csrf_token!(auth_token)
     header_token = request.headers['X-API-CSRF-TOKEN']
-    digest = OpenSSL::HMAC.hexdigest('SHA256', ENV['AUTH_CLIENT_SECRET'].to_s, auth_token.to_s)
+    digest = OpenSSL::HMAC.hexdigest('SHA256', Rails.application.credentials.auth_client_secret, auth_token.to_s)
     raise CsrfTokenInvalid, 'Can\'t verify API CSRF token' unless header_token == digest
   end
 
   def decode_auth_token(token)
     options = { algorithm: 'HS256' }
-    decoded_token = JWT.decode(token, ENV['AUTH_CLIENT_SECRET'], true, options)
+    decoded_token = JWT.decode(token, Rails.application.credentials.auth_client_secret, true, options)
     decoded_token[0]
   end
 
@@ -46,6 +48,7 @@ class AuthController < ActionController::API
         aud: auth_token['aud'],
         sub: auth_token['user_id'],
         scopes: auth_token['scopes'] || {}
-      }, ENV['API_SECRET'], 'HS256')
+      }, Rails.application.credentials.api_secret, 'HS256'
+    )
   end
 end

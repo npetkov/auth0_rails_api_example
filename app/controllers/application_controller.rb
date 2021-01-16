@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::API
   include Pundit
   include BearerHeaders
@@ -14,7 +16,7 @@ class ApplicationController < ActionController::API
       algorithm: 'HS256'
     }
     begin
-      @token = JWT.decode(token, ENV['API_SECRET'], true, options)[0]
+      @token = JWT.decode(token, Rails.application.credentials.api_secret, true, options)[0]
     rescue JWT::DecodeError => e
       response.headers.merge!(api_unauthenticated(e))
       head 401

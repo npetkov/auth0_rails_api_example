@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 # See http://self-issued.info/docs/draft-ietf-oauth-v2-bearer.html#authn-header
 module BearerHeaders
   extend ActiveSupport::Concern
 
-  WWW_AUTHENTICATE = 'WWW-Authenticate'.freeze
+  WWW_AUTHENTICATE = 'WWW-Authenticate'
 
   included do
     def auth0_unauthenticated(decode_error)
