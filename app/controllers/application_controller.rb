@@ -28,7 +28,6 @@ class ApplicationController < ActionController::API
   end
 
   rescue_from Pundit::NotAuthorizedError do
-    response.headers.merge!(api_unauthorized)
     head 403
   end
 end

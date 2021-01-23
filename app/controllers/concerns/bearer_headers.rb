@@ -1,22 +1,14 @@
 # frozen_string_literal: true
 
-# See http://self-issued.info/docs/draft-ietf-oauth-v2-bearer.html#authn-header
+# See https://self-issued.info/docs/draft-ietf-oauth-v2-bearer.html#authn-header
 module BearerHeaders
   extend ActiveSupport::Concern
 
   WWW_AUTHENTICATE = 'WWW-Authenticate'
 
   included do
-    def auth0_unauthenticated(decode_error)
-      { WWW_AUTHENTICATE => from_error(decode_error, 'auth0') }
-    end
-
     def api_unauthenticated(decode_error)
       { WWW_AUTHENTICATE => from_error(decode_error, 'api') }
-    end
-
-    def api_unauthorized
-      { WWW_AUTHENTICATE => from_error('insufficient scope', 'api') }
     end
 
     private
