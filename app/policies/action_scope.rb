@@ -8,18 +8,27 @@ class ActionScope
   end
 
   def action_allowed?(policy_class, method_name)
-    return false unless token[:scopes].key?(:actions)
+    return false unless token.key?(:permissions)
 
-    allowed_actions = resource_actions policy_class
-    action = current_action method_name
-    allowed_actions.include?('*') || allowed_actions.include?(action)
+    allowed_actions = resource_actions(policy_class)
+    action = current_action(method_name)
+    allowed_actions.include?(action)
   end
 
   private
 
   def resource_actions(policy_class)
-    endpoint = policy_class.name.downcase[/^(.*)policy$/, 1].pluralize.to_sym
-    token[:scopes][:actions][endpoint] || []
+    resource = policy_class.name.downcase[/^(.*)policy$/, 1].pluralize
+    permissions = map_permissions
+    permissions[resource] || []
+  end
+
+  def map_permissions
+    hash = Hash.new { |map, key| map[key] = [] }
+    token[:permissions].each_with_object(hash) do |permission, map|
+      action, resource = permission.split(':')
+      map[resource] << action
+    end
   end
 
   def current_action(method_name)

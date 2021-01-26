@@ -5,11 +5,9 @@ class NotePolicy < ApplicationPolicy
     %i[name content]
   end
 
-  module NotePolicy
-    class Scope < ApplicationPolicy::Scope
-      def resolve
-        Note.unscoped
-      end
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      Note.unscoped
     end
   end
 end
