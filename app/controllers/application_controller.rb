@@ -12,6 +12,8 @@ class ApplicationController < ActionController::API
     auth_header = request.headers['Authorization'] || ''
     token = auth_header.split.last
     options = {
+      aud: Rails.application.credentials.api_identifier,
+      verify_aud: true,
       verify_iat: true,
       algorithm: 'HS256'
     }

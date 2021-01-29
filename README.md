@@ -118,7 +118,7 @@ ruby 3.0.0p0 (2020-12-25 revision 95aff21468) [x86_64-linux]
 
 * When finished, double-check: `gem info rails`
 
-### Setting up an Auth0 application and API
+## Setting up an Auth0 application and API
 
 Signing up for an Auth0 account is rather straightforward, but there is one
 caveat: use a regular username/password to register if you plan on adding social
@@ -178,7 +178,7 @@ on the far right. The following configuration must be applied:
 * If you have already registered/created some users, you can proceed with
   assigning them some of the newly created roles.
 
-## Creating a social connection - allowing "sign in with Google" for your application
+### Creating a social connection - allowing "sign in with Google" for your application
 
 This step is optional, but it has saved me a lot of time during development.
 From the "Connections" menu in the sidebar, choose "Social" and then add
@@ -218,6 +218,9 @@ the following credentials being present:
 * __api_secret__ - this is the value used to sign the JWT tokens which API will
   use for authentication. The value must be copied from the "Signing Secret"
   (read-only) input field in the "Token Settings" section of your Auth0 API.
+* __api_identifier__ - the identifier used for the auth0 API project. It will
+  appear in the `aud` claim of the access tokens issued by Auth0 and used to
+  access the API.
 
 In order to edit the Rails application credentials, run `bin/rails credentials:edit`
 in the project root. If Rails complains about an unset `EDITOR` environmental
@@ -239,9 +242,10 @@ default. This can be changed in `config/initializers/cors.rb`.
 
 ## Authentication flow
 
-The API authentication relies solely on an `Authorization` header, which must
-be. The current implementation of the verification hook checks verifies only the
-"issued at" claim (beyond the token signature).
+The API authentication relies solely on an `Authorization` header, which must be
+supplied with every request. The current implementation of the verification hook
+checks verifies  the "issued at" and "audience" claim (beyond the token
+signature).
 
 ``` ruby
 before_action :verify_token
@@ -251,6 +255,8 @@ def verify_token
   auth_header = request.headers['Authorization'] || ''
   token = auth_header.split.last
   options = {
+    aud: Rails.credentials.application.api_identifier,
+    verify_aud: true,
     verify_iat: true,
     algorithm: 'HS256'
   }
